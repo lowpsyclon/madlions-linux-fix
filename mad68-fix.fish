@@ -66,7 +66,7 @@ else
 end
 
 set -l USER_IN_GROUP 0
-if id -nG $CURRENT_USER | string match -rq "(^| )$GROUP_NAME( |$)"
+if contains -- $GROUP_NAME (id -nG $CURRENT_USER | string split ' ')
     set USER_IN_GROUP 1
     ok "User '$CURRENT_USER' is already in group '$GROUP_NAME'."
 else
@@ -139,7 +139,6 @@ end
 echo
 ok "Done."
 echo "The keyboard should now be detected by the web configurator."
-
 echo "For permanent access, logout/login is recommended."
 
 if test $USER_IN_GROUP -eq 0
