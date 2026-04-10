@@ -32,3 +32,18 @@ This script:
 ```fish
 chmod +x mad68-fix.fish
 ./mad68-fix.fish
+
+Then open the configurator using:
+
+Chromium
+Google Chrome
+Notes
+No permanent 0666 permissions are used (secure)
+If the script adds you to a group, logout/login is recommended
+Keywords
+
+madlions linux fix, mad68 linux, webhid linux, hidraw permissions, keyboard configurator not working linux
+
+License
+
+MIT
