@@ -14,22 +14,22 @@ function ok
 end
 
 function warn
-    echo "[AVISO] $argv"
+    echo "[WARN] $argv"
 end
 
 function fail
-    echo "[ERRO] $argv" >&2
+    echo "[ERROR] $argv" >&2
     exit 1
 end
 
 function need_cmd
     if not command -q $argv[1]
-        fail "Comando ausente: $argv[1]"
+        fail "Missing command: $argv[1]"
     end
 end
 
 if test (id -u) -eq 0
-    fail "Não rode como root. Use seu usuário normal."
+    fail "Do not run as root. Use a regular user with sudo."
 end
 
 need_cmd lsusb
@@ -46,52 +46,52 @@ if test -z "$CURRENT_USER"
     set CURRENT_USER (id -un)
 end
 
-info "Procurando teclado Madlions MAD68 ($VENDOR_ID:$PRODUCT_ID)..."
+info "Searching for Madlions MAD68 keyboard ($VENDOR_ID:$PRODUCT_ID)..."
 set -l KB_LINE (lsusb | grep -i "$VENDOR_ID:$PRODUCT_ID")
 
 if test -z "$KB_LINE"
-    fail "Teclado MAD68 não encontrado. Conecte o teclado e rode o script de novo."
+    fail "MAD68 keyboard not found. Please connect it and run the script again."
 end
 
-ok "Teclado detectado:"
+ok "Keyboard detected:"
 echo "    $KB_LINE"
 
 if not getent group $GROUP_NAME >/dev/null
-    info "Criando grupo '$GROUP_NAME'..."
+    info "Creating group '$GROUP_NAME'..."
     sudo groupadd $GROUP_NAME
-    or fail "Não consegui criar o grupo '$GROUP_NAME'."
-    ok "Grupo '$GROUP_NAME' criado."
+    or fail "Failed to create group '$GROUP_NAME'."
+    ok "Group '$GROUP_NAME' created."
 else
-    ok "Grupo '$GROUP_NAME' já existe."
+    ok "Group '$GROUP_NAME' already exists."
 end
 
 set -l USER_IN_GROUP 0
 if id -nG $CURRENT_USER | string match -rq "(^| )$GROUP_NAME( |$)"
     set USER_IN_GROUP 1
-    ok "Usuário '$CURRENT_USER' já está no grupo '$GROUP_NAME'."
+    ok "User '$CURRENT_USER' is already in group '$GROUP_NAME'."
 else
-    info "Adicionando '$CURRENT_USER' ao grupo '$GROUP_NAME'..."
+    info "Adding '$CURRENT_USER' to group '$GROUP_NAME'..."
     sudo usermod -aG $GROUP_NAME $CURRENT_USER
-    or fail "Não consegui adicionar '$CURRENT_USER' ao grupo '$GROUP_NAME'."
-    ok "Usuário adicionado ao grupo '$GROUP_NAME'."
+    or fail "Failed to add '$CURRENT_USER' to group '$GROUP_NAME'."
+    ok "User added to group '$GROUP_NAME'."
 end
 
 set -l RULE_TEXT "KERNEL==\"hidraw*\", SUBSYSTEM==\"hidraw\", ATTRS{idVendor}==\"$VENDOR_ID\", ATTRS{idProduct}==\"$PRODUCT_ID\", GROUP=\"$GROUP_NAME\", MODE=\"0660\""
 
-info "Gravando regra permanente em $RULE_FILE ..."
+info "Writing udev rule to $RULE_FILE ..."
 printf "%s\n" $RULE_TEXT | sudo tee $RULE_FILE >/dev/null
-or fail "Não consegui gravar a regra udev."
+or fail "Failed to write udev rule."
 
-ok "Regra salva."
+ok "Rule saved."
 
-info "Recarregando regras do udev..."
+info "Reloading udev rules..."
 sudo udevadm control --reload-rules
-or fail "Falha ao recarregar o udev."
+or fail "Failed to reload udev rules."
 
 sudo udevadm trigger
-or fail "Falha ao aplicar trigger do udev."
+or fail "Failed to apply udev trigger."
 
-ok "udev recarregado."
+ok "udev reloaded."
 
 set -l HID_MATCHES
 
@@ -107,43 +107,44 @@ for d in /dev/hidraw*
 end
 
 if test (count $HID_MATCHES) -eq 0
-    fail "Não encontrei interfaces hidraw do teclado."
+    fail "No matching hidraw interfaces found."
 end
 
-ok "Interfaces hidraw do MAD68:"
+ok "MAD68 hidraw interfaces:"
 for d in $HID_MATCHES
     echo "    $d"
 end
 
-info "Aplicando permissão imediata para funcionar já nesta sessão..."
+info "Applying immediate permissions for current session..."
 for d in $HID_MATCHES
     sudo chgrp $GROUP_NAME $d
-    or fail "Falha em chgrp $d"
+    or fail "Failed to change group on $d"
 
     sudo chmod 0660 $d
-    or fail "Falha em chmod $d"
+    or fail "Failed to change permissions on $d"
 
     if command -q setfacl
         sudo setfacl -m u:$CURRENT_USER:rw $d
     end
 end
 
-ok "Permissões imediatas aplicadas."
+ok "Permissions applied."
 
 echo
-info "Estado final dos dispositivos:"
+info "Final device state:"
 for d in $HID_MATCHES
     ls -l $d
 end
 
 echo
-ok "Pronto."
-echo "Agora o teclado já deve ser reconhecido pelo configurador web nesta sessão."
-echo "Para o acesso continuar normal nas próximas sessões/conexões, faça logout/login quando puder."
+ok "Done."
+echo "The keyboard should now be detected by the web configurator."
+
+echo "For permanent access, logout/login is recommended."
 
 if test $USER_IN_GROUP -eq 0
-    warn "Você foi adicionado a um grupo novo. O script já liberou acesso agora via ACL, mas o logout/login é o que consolida isso permanentemente."
+    warn "User was added to a new group. Logout/login is required for full effect."
 end
 
 echo
-echo "Abra o Chromium/Chrome e teste o configurador."
+echo "Open the configurator using Chromium or Google Chrome."
