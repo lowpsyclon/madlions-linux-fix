@@ -31,7 +31,7 @@ This script:
 
 ```fish
 chmod +x mad68-fix.fish
-./mad68-fix.fish
+./mad68-fix.fish ```
 
 Then open the configurator using:
 
