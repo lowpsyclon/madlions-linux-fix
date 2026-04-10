@@ -1,4 +1,3 @@
-markdown
 # Madlions MAD68 Linux Fix
 
 A Fish script to fix WebHID/hidraw access issues for the Madlions MAD68 on Linux.
@@ -27,21 +26,6 @@ This script:
 
 ## Usage
 
-fish
+```fish
 chmod +x mad68-fix.fish
 ./mad68-fix.fish
-
-Then open the configurator using:
-
-Chromium
-Google Chrome
-Notes
-No permanent 0666 permissions are used
-If the script adds your user to a group, logout/login is recommended
-Keywords
-
-Madlions Linux fix, MAD68 Linux, WebHID Linux, hidraw permissions, keyboard configurator not working on Linux
-
-License
-
-MIT
