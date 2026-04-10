@@ -1,6 +1,7 @@
+```markdown
 # Madlions MAD68 Linux Fix
 
-Fix for Madlions magnetic keyboards (MAD68) on Linux.
+A Fish script to fix WebHID/hidraw access issues for the Madlions MAD68 on Linux.
 
 ## Problem
 
