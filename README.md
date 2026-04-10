@@ -29,3 +29,17 @@ This script:
 ```fish
 chmod +x mad68-fix.fish
 ./mad68-fix.fish
+```
+Then open the configurator using:
+
+- Chromium
+- Google Chrome
+
+## Notes
+
+- No permanent `0666` permissions are used
+- If the script adds your user to a group, logout/login is recommended
+
+## License
+
+MIT
