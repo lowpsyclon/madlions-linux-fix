@@ -1,24 +1,34 @@
-# madlions-linux-fix
+# Madlions MAD68 Linux Fix
 
-Script em Fish para corrigir o acesso do configurador web do teclado magnético Madlions MAD68 no Linux.
+Fix for Madlions magnetic keyboards (MAD68) on Linux.
 
-## O que ele faz
+## Problem
 
-- detecta o MAD68 (`373b:105c`)
-- cria o grupo `hidaccess`
-- adiciona seu usuário ao grupo
-- cria a regra `udev`
-- recarrega o `udev`
-- aplica permissão imediata na sessão atual
-- evita usar `0666` permanente
+The keyboard works for typing, but the web configurator cannot detect or access the device due to `hidraw` permission restrictions.
 
-## Uso
+## Solution
+
+This script:
+
+- detects the keyboard (`373b:105c`)
+- creates a dedicated access group
+- adds your user to the group
+- creates a proper udev rule
+- reloads udev
+- applies immediate permissions (works without reboot)
+
+## Requirements
+
+- Linux (udev-based)
+- fish shell
+- git
+- github-cli (`gh`)
+- packages:
+  - `usbutils`
+  - `acl` (optional but recommended)
+
+## Usage
 
 ```fish
 chmod +x mad68-fix.fish
 ./mad68-fix.fish
-```
-
-Depois, teste no Chromium/Chrome.
-
-Se o script adicionou seu usuário ao grupo `hidaccess`, faça logout/login depois para consolidar a permissão permanente.
